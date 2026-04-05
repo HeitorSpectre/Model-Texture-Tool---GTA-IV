@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F8D1363B-E0E8-4277-B0BE-4F8655BB5918}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ModelTextureTool.PythonBackendBuild</RootNamespace>
+    <AssemblyName>ModelTextureTool.PythonBackendBuild</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="PythonBackendBuildMarker.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="RageLib\Common\Common.csproj">
+      <Project>{B2A6C9F9-A2BA-49EE-A364-2E839BD381BA}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="RageLib\Models\Models.csproj">
+      <Project>{BEC8B82B-9EB6-43CA-BB70-8AFB8729E230}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="RageLib\Textures\Textures.csproj">
+      <Project>{C4085463-5BE2-4F87-8006-7FED126652F1}</Project>
+      <Name>Textures</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="build_python_vendor.bat" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="SyncPythonVendor" AfterTargets="Build">
+    <PropertyGroup>
+      <PythonVendorDir>$(MSBuildProjectDirectory)\..\Python\vendor</PythonVendorDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(PythonVendorDir)" />
+    <Copy SourceFiles="RageLib\Common\bin\$(Configuration)\RageLib.Common.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="RageLib\Common\bin\$(Configuration)\RageLib.Common.pdb" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="RageLib\Textures\bin\$(Configuration)\RageLib.Textures.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="RageLib\Textures\bin\$(Configuration)\RageLib.Textures.pdb" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="RageLib\Models\bin\$(Configuration)\RageLib.Models.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="RageLib\Models\bin\$(Configuration)\RageLib.Models.pdb" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="Vendor\ICSharpCode.SharpZipLib.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="Vendor\libsquish.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="Vendor\ragezip.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="xcompress.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="xcompress_cpp.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="xcompress_open.dll" DestinationFolder="$(PythonVendorDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>
