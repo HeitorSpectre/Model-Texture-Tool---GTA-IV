@@ -18,8 +18,7 @@ PS3:
 
 PC:
 
-<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e07226a2-b0b6-496f-82d0-0d4a8d65f523" />
-
+<img width="957" height="627" alt="image" src="https://github.com/user-attachments/assets/302ebcdf-c6b6-4ee4-abc8-c0ec6d31523c" />
 
 This version of the project was organized to use the main tool in `Python`, while the `CSharp` folder is used to compile the DLLs and dependencies that the Python script needs to run.
 
