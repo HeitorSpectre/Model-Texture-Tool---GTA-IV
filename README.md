@@ -99,7 +99,7 @@ This `.bat` installs everything needed for the build and generates the compiled 
 Expected output:
 
 ```text
-Python\dist\Model Texture Tool.exe
+dist\Model Texture Tool.exe
 ```
 
 ## Quick summary
