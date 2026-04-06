@@ -6,6 +6,21 @@
 - `PS3` with `.cdr` files  
 - `Xbox 360` with `.xdr` files  
 
+# Test
+
+Xbox 360:
+
+<img width="958" height="519" alt="image" src="https://github.com/user-attachments/assets/40690c51-2180-42a5-8b62-ed41f5b6fe3c" />
+
+PS3:
+
+<img width="959" height="569" alt="image" src="https://github.com/user-attachments/assets/7ffc6659-4451-4baa-a119-0f6598a2fb3d" />
+
+PC:
+
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e07226a2-b0b6-496f-82d0-0d4a8d65f523" />
+
+
 This version of the project was organized to use the main tool in `Python`, while the `CSharp` folder is used to compile the DLLs and dependencies that the Python script needs to run.
 
 ## Project structure
