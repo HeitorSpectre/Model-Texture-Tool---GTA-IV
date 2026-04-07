@@ -281,17 +281,17 @@ class RageBackend:
         texture = self._get_runtime_texture(index)
         original_image = texture.Decode(mip_level)
         bitmap = self._ensure_bitmap(original_image)
-        filtered_bitmap = None
+        preview_bitmap = None
 
         try:
+            preview_bitmap = self._clone_bitmap(bitmap)
+            self._swap_red_blue_channels(preview_bitmap)
             if channel != "all":
-                filtered_bitmap = self._clone_bitmap(bitmap)
-                self._apply_channel_filter(filtered_bitmap, channel)
-                return self._bitmap_to_base64_png(filtered_bitmap)
-            return self._bitmap_to_base64_png(bitmap)
+                self._apply_channel_filter(preview_bitmap, channel)
+            return self._bitmap_to_base64_png(preview_bitmap)
         finally:
-            if filtered_bitmap is not None:
-                filtered_bitmap.Dispose()
+            if preview_bitmap is not None:
+                preview_bitmap.Dispose()
             if bitmap is not None and bitmap is not original_image:
                 bitmap.Dispose()
             if original_image is not None:
@@ -742,6 +742,16 @@ function Bitmap-ToPngBase64([System.Drawing.Image]$image) {
     }
 }
 
+function Normalize-PreviewBitmap([System.Drawing.Bitmap]$bitmap) {
+    for ($y = 0; $y -lt $bitmap.Height; $y++) {
+        for ($x = 0; $x -lt $bitmap.Width; $x++) {
+            $pixel = $bitmap.GetPixel($x, $y)
+            $bitmap.SetPixel($x, $y, [System.Drawing.Color]::FromArgb($pixel.A, $pixel.B, $pixel.G, $pixel.R))
+        }
+    }
+    return $bitmap
+}
+
 function Compress-XboxLzxPayload([byte[]]$payload) {
     if ($null -eq $payload -or $payload.Length -eq 0) {
         throw 'The Xbox resource payload is empty.'
@@ -943,12 +953,15 @@ try {
                     thumbnail_png_base64 = ''
                 }
                 if (-not $texture.IsExternalReference) {
-                    $thumbnail = $texture.DecodeAsThumbnail()
+                    $thumbnailImage = $texture.DecodeAsThumbnail()
+                    $thumbnail = New-Object System.Drawing.Bitmap($thumbnailImage)
                     try {
+                        $thumbnail = Normalize-PreviewBitmap $thumbnail
                         $items[$items.Count - 1].thumbnail_png_base64 = Bitmap-ToPngBase64 $thumbnail
                     }
                     finally {
                         $thumbnail.Dispose()
+                        $thumbnailImage.Dispose()
                     }
                 }
             }
@@ -963,6 +976,7 @@ try {
             $image = $texture.Decode([int]$request.mip_level)
             $bitmap = New-Object System.Drawing.Bitmap($image)
             try {
+                $bitmap = Normalize-PreviewBitmap $bitmap
                 $bitmap = Convert-Channel $bitmap ([string]$request.channel)
                 [Console]::Out.Write((Bitmap-ToPngBase64 $bitmap))
             }
@@ -974,10 +988,13 @@ try {
         'thumbnail' {
             $texture = $model.EmbeddedTextureFile.Textures[[int]$request.index]
             $image = $texture.DecodeAsThumbnail()
+            $bitmap = New-Object System.Drawing.Bitmap($image)
             try {
-                [Console]::Out.Write((Bitmap-ToPngBase64 $image))
+                $bitmap = Normalize-PreviewBitmap $bitmap
+                [Console]::Out.Write((Bitmap-ToPngBase64 $bitmap))
             }
             finally {
+                $bitmap.Dispose()
                 $image.Dispose()
             }
         }
@@ -1295,6 +1312,31 @@ finally {
                     buffer[offset + 1] = value
                     buffer[offset + 2] = value
                     buffer[offset + 3] = 255
+
+            self._runtime.Marshal.Copy(self._runtime.ByteArray(bytes(buffer)), 0, bitmap_data.Scan0, total_bytes)
+        finally:
+            bitmap.UnlockBits(bitmap_data)
+
+    def _swap_red_blue_channels(self, bitmap) -> None:
+        rect = self._runtime.Rectangle(0, 0, bitmap.Width, bitmap.Height)
+        bitmap_data = bitmap.LockBits(
+            rect,
+            self._runtime.ImageLockMode.ReadWrite,
+            self._runtime.PixelFormat.Format32bppArgb,
+        )
+
+        try:
+            total_bytes = abs(bitmap_data.Stride) * bitmap.Height
+            managed = self._runtime.SystemArray.CreateInstance(self._runtime.SystemByte, total_bytes)
+            self._runtime.Marshal.Copy(bitmap_data.Scan0, managed, 0, total_bytes)
+            buffer = bytearray(list(managed))
+            stride = abs(bitmap_data.Stride)
+
+            for y in range(bitmap.Height):
+                row_start = y * stride
+                for x in range(bitmap.Width):
+                    offset = row_start + (x * 4)
+                    buffer[offset + 0], buffer[offset + 2] = buffer[offset + 2], buffer[offset + 0]
 
             self._runtime.Marshal.Copy(self._runtime.ByteArray(bytes(buffer)), 0, bitmap_data.Scan0, total_bytes)
         finally:
